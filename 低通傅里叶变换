@@ -1,0 +1,46 @@
+clear all;  
+close all;  
+clc;  
+d0=100;  %阈值
+i=imread('C:\Users\hasee\Desktop\circle.jpg');            %读入原图像文件 
+
+figure(1);                                        %设定窗口 
+imshow(i);                                        %显示原图像 
+title('原图像')                                   %图像命名 
+
+h=rgb2gray(i);                                    %转换为灰度图 
+
+j=fft2(h);                                        %二维离散傅立叶变换 
+
+img_f=fftshift(j);                                    %直流分量移到频谱中心 
+
+l=log(abs(img_f));                                    %数字图像的对数变换 
+
+figure(2);                                        %设定窗口 
+imshow(l,[]);                                     %显示原图像 
+title('经过二维快速傅立叶变换后的图像')           %图像命名 
+
+% 
+% 
+[m n]=size(img_f);  
+m_mid=fix(m/2);  %是不是可以有其他取整方式？  
+n_mid=fix(n/2);    
+img_lpf=zeros(m,n);  
+for i=1:m  
+    for j=1:n  
+        d=sqrt((i-m_mid)^2+(j-n_mid)^2);   %理想低通滤波，求距离  
+        if d<=d0  
+            img_lpf(i,j)=img_f(i,j);
+        else  
+            img_lpf(i,j)=0;
+        end     
+    end  
+end  
+figure(3),imshow(img_lpf);
+title('经过低通PSF后的图像')
+% 
+img_lpf=ifftshift(img_lpf);    %反傅里叶变换  
+img_lpf=uint8(real(ifft2(img_lpf)));  %取实数部分  
+
+figure(4),imshow(img_lpf,[]);title('理想低通滤波还原的图像'); 
+%imwrite(img_lpf,'C:\Users\hasee\Desktop\10.tif')
